@@ -38,32 +38,57 @@ def test_db():
     Test route to verify database is working.
     Creates a test user and todo if they don't exist.
     """
-    # Check if test user exists
-    user = User.query.filter_by(username='testuser').first()
+    users_data = [
+        {'username': 'alice', 'email': 'alice@test.com'},
+        {'username': 'bob', 'email': 'bob@test.com'},
+        {'username': 'charlie', 'email': 'charlie@test.com'}
+    ]
 
-    if not user:
-        # Create test user
-        user = User(
-            username='testuser',
-            email='test@example.com',
-            password_hash='temporary'
-        )
-        db.session.add(user)
-        db.session.commit()
+    for data in users_data:
+        # Check if test user exists
+        user = User.query.filter_by(username=data['username']).first()
 
-        # Create test todo
-        todo = Todo(
-            task_content='Learn SQLAlchemy',
-            user_id=user.id
-        )
-        db.session.add(todo)
-        db.session.commit()
+        if not user:
+            # Create test user
+            user = User(
+                username=data['username'],
+                email=data['email'],
+                password_hash='temporary'
+            )
+            db.session.add(user)
+            db.session.commit()
 
-    # Get all users and todos for display
-    all_users = User.query.all()
-    all_todos = Todo.query.all()
+             # Create different todos for each user
+            todo1 = Todo(
+                task_content=f"Task 1 for {user.username}",
+                is_completed=False,
+                user_id=user.id
+            )
 
-    return render_template('test_db.html', users=all_users, todos=all_todos)
+            todo2 = Todo(
+                task_content=f"Task 2 for {user.username}",
+                is_completed=False,
+                user_id=user.id
+            )
+
+            db.session.add_all([todo1, todo2])
+            db.session.commit()
+
+        # Get all users and todos for display
+        all_users = User.query.all()
+        all_todos = Todo.query.all()
+
+        # 1. Get all users
+        all_users = User.query.all()
+        print("All users:", all_users)
+        # 2. Get first user
+        first_user = User.query.first()
+        print("First user:", first_user.username if first_user else "No users")
+        # 3. Count total users
+        user_count = User.query.count()
+        print("Total users:", user_count)
+
+        return render_template('test_db.html', users=all_users, todos=all_todos)
 
 
 # =============================================================================
